@@ -28,7 +28,6 @@ public class FileProcessor {
 	}
 	
 	public boolean fetchFile(String excelFilePath) throws IOException {
-		// TODO check the excel file fetching
 			FileInputStream inputStream = new FileInputStream(new File(excelFilePath));
 			Workbook workbook;
 			if(excelFilePath.contains(".xlsx")){

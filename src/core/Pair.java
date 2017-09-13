@@ -24,6 +24,14 @@ public class Pair {
 	public void setValTwo(int valTwo) {
 		this.valTwo = valTwo;
 	}
+
+	public boolean contains(int colNum) {
+		if (valOne == colNum || valTwo == colNum) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 	
 	
 	

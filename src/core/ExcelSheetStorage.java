@@ -3,7 +3,6 @@ package core;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.apache.poi.hssf.usermodel.examples.CellTypes;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -52,12 +51,49 @@ public class ExcelSheetStorage {
 	}
 
 	private void sortWithSubgroups(int colNum) {
-		// TODO Auto-generated method stub
 
 		ArrayList<Pair> headerPairs = new ArrayList<Pair>();
+		ArrayList<RowSubgroup> subGroups = new ArrayList<RowSubgroup>();
 		findHeaderPairs(headerPairs);
-		//findSubgroups(colNum);
 		
+		
+		int realColNum = findNthHeader(colNum);
+		findSubgroups(headerPairs, subGroups, realColNum);
+		
+		
+		if(subGroups.isEmpty()) {
+			sortWithoutSubgroups(realColNum);
+		} else {
+			//TODO sort the subgroups, and the main groups, and then move each subgroup to where the rwo with the paired name is
+		}
+	}
+
+	private void findSubgroups(ArrayList<Pair> headerPairs, ArrayList<RowSubgroup> subGroups, int colNum) {
+		Pair workingPair;
+		for(int i=0;i<headerPairs.size()-1;i++){
+			Pair currentPair = headerPairs.get(i);
+			if (currentPair.contains(colNum)){
+				workingPair = currentPair;
+				break;
+			}
+		}
+		//TODO once I have the working Pair, (or there is no working pair for this sort), find the subgroups
+		
+	}
+
+	private int findNthHeader(int colNum) {
+		Row headingsRow = rows.get(3);
+		int headingNum = 0;
+		for(int i=0;i<headingsRow.getLastCellNum()-1;i++) {
+			Cell nextCell = headingsRow.getCell(i);
+			if(nextCell != null && nextCell.getCellTypeEnum() != null || nextCell.getCellTypeEnum() != CellType.BLANK){
+				headingNum++;
+			}
+			if(headingNum == colNum){
+				return i;
+			}
+		}
+		return 0;
 	}
 
 	private void findHeaderPairs(ArrayList<Pair> headerPairs) {
