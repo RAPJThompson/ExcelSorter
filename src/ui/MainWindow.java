@@ -37,8 +37,8 @@ public class MainWindow {
 	private JTextField textFieldFullPathToOutputFile;
 	protected static FileProcessor fileProcessor;
 	final JFileChooser openFileChooser;
-    final JFileChooser saveFileChooser;
-	
+	final JFileChooser saveFileChooser;
+
 	/**
 	 * Create the application.
 	 */
@@ -54,11 +54,14 @@ public class MainWindow {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		
+		
+		
 		frmExcelDocumentSorter = new JFrame();
 		frmExcelDocumentSorter.setTitle("Excel Document Sorter");
 		frmExcelDocumentSorter.setBounds(100, 100, 496, 280);
 		frmExcelDocumentSorter.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
+
 		JPanel panel = new JPanel();
 		frmExcelDocumentSorter.getContentPane().add(panel, BorderLayout.CENTER);
 		panel.setMinimumSize(new Dimension(0,0));
@@ -68,7 +71,7 @@ public class MainWindow {
 		gbl_panel.columnWeights = new double[]{1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0};
 		gbl_panel.rowWeights = new double[]{1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0};
 		panel.setLayout(gbl_panel);
-		
+
 		JPanel leftFillerPanel = new JPanel();
 		GridBagConstraints gbc_leftFillerPanel = new GridBagConstraints();
 		gbc_leftFillerPanel.gridheight = 7;
@@ -78,7 +81,7 @@ public class MainWindow {
 		gbc_leftFillerPanel.gridy = 0;
 		panel.add(leftFillerPanel, gbc_leftFillerPanel);
 		leftFillerPanel.setMinimumSize(new Dimension(25, 0));
-		
+
 		JPanel topFillerPanel = new JPanel();
 		GridBagConstraints gbc_topFillerPanel = new GridBagConstraints();
 		gbc_topFillerPanel.gridwidth = 5;
@@ -93,7 +96,7 @@ public class MainWindow {
 		gbl_topFillerPanel.columnWeights = new double[]{0.0};
 		gbl_topFillerPanel.rowWeights = new double[]{0.0};
 		topFillerPanel.setLayout(gbl_topFillerPanel);
-		
+
 		JLabel lblErrorMessage = new JLabel("Error retrieving that file.");
 		lblErrorMessage.setHorizontalAlignment(SwingConstants.CENTER);
 		GridBagConstraints gbc_lblErrorMessage = new GridBagConstraints();
@@ -103,7 +106,7 @@ public class MainWindow {
 		topFillerPanel.add(lblErrorMessage, gbc_lblErrorMessage);
 		lblErrorMessage.setForeground(Color.red); 
 		lblErrorMessage.setVisible(false);
-		
+
 		JPanel rightFillerPanel = new JPanel();
 		GridBagConstraints gbc_rightFillerPanel = new GridBagConstraints();
 		gbc_rightFillerPanel.insets = new Insets(0, 0, 5, 0);
@@ -112,7 +115,7 @@ public class MainWindow {
 		gbc_rightFillerPanel.gridx = 6;
 		gbc_rightFillerPanel.gridy = 0;
 		panel.add(rightFillerPanel, gbc_rightFillerPanel);
-		
+
 		JTextField textFieldFullPathToInputFile = new JTextField("");
 		GridBagConstraints gbc_textFieldFullPathToInputFile = new GridBagConstraints();
 		gbc_textFieldFullPathToInputFile.fill = GridBagConstraints.BOTH;
@@ -124,7 +127,7 @@ public class MainWindow {
 		panel.add(textFieldFullPathToInputFile, gbc_textFieldFullPathToInputFile);
 		textFieldFullPathToInputFile.setVisible(false);
 		textFieldFullPathToInputFile.setEditable(false);
-		
+
 		JLabel lblNewLabel = new JLabel("Sort By");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
 		gbc_lblNewLabel.gridwidth = 3;
@@ -133,7 +136,7 @@ public class MainWindow {
 		gbc_lblNewLabel.gridx = 1;
 		gbc_lblNewLabel.gridy = 2;
 		panel.add(lblNewLabel, gbc_lblNewLabel);
-		
+
 		DefaultComboBoxModel<String> sortByListModel = new DefaultComboBoxModel<String>();
 		JComboBox<String> sortByList = new JComboBox<String>(sortByListModel);
 		GridBagConstraints gbc_sortByList = new GridBagConstraints();
@@ -143,7 +146,7 @@ public class MainWindow {
 		gbc_sortByList.gridx = 4;
 		gbc_sortByList.gridy = 2;
 		panel.add(sortByList, gbc_sortByList);
-		
+
 		JLabel lblOutputLocationoptional = new JLabel("Output Location (Optional)");
 		GridBagConstraints gbc_lblOutputLocationoptional = new GridBagConstraints();
 		gbc_lblOutputLocationoptional.fill = GridBagConstraints.HORIZONTAL;
@@ -152,7 +155,7 @@ public class MainWindow {
 		gbc_lblOutputLocationoptional.gridx = 1;
 		gbc_lblOutputLocationoptional.gridy = 3;
 		panel.add(lblOutputLocationoptional, gbc_lblOutputLocationoptional);
-		
+
 		textFieldFullPathToOutputFile = new JTextField();
 		textFieldFullPathToOutputFile.setText(" ");
 		textFieldFullPathToOutputFile.setColumns(10);
@@ -166,8 +169,8 @@ public class MainWindow {
 		panel.add(textFieldFullPathToOutputFile, gbc_textFieldFullPathToOutputFile);
 		textFieldFullPathToOutputFile.setEditable(false);
 		textFieldFullPathToOutputFile.setVisible(false);
-		
-		
+
+
 		JButton btnFetchButton = new JButton("Get File");
 		GridBagConstraints gbc_btnFetchButton = new GridBagConstraints();
 		gbc_btnFetchButton.insets = new Insets(0, 0, 5, 5);
@@ -176,7 +179,7 @@ public class MainWindow {
 		gbc_btnFetchButton.gridy = 5;
 		panel.add(btnFetchButton, gbc_btnFetchButton);
 		btnFetchButton.setVisible(true);		
-		
+
 		JButton btnResetButton = new JButton("Reset");
 		GridBagConstraints gbc_btnResetButton = new GridBagConstraints();
 		gbc_btnResetButton.insets = new Insets(0, 0, 5, 5);
@@ -185,7 +188,7 @@ public class MainWindow {
 		gbc_btnResetButton.gridy = 5;
 		panel.add(btnResetButton, gbc_btnResetButton);
 		btnResetButton.setVisible(false);		
-		
+
 		JButton btnSortButton = new JButton("Sort");
 		GridBagConstraints gbc_btnSortButton = new GridBagConstraints();
 		gbc_btnSortButton.insets = new Insets(0, 0, 5, 5);
@@ -194,8 +197,8 @@ public class MainWindow {
 		gbc_btnSortButton.gridy = 5;
 		panel.add(btnSortButton, gbc_btnSortButton);
 		btnSortButton.setVisible(false);
-		
-		
+
+
 		JPanel bottomFillerPanel = new JPanel();
 		GridBagConstraints gbc_bottomFillerPanel = new GridBagConstraints();
 		gbc_bottomFillerPanel.gridwidth = 5;
@@ -204,7 +207,7 @@ public class MainWindow {
 		gbc_bottomFillerPanel.gridx = 1;
 		gbc_bottomFillerPanel.gridy = 6;
 		panel.add(bottomFillerPanel, gbc_bottomFillerPanel);
-		
+
 		JButton btnPickFile = new JButton("Select Excel File");
 		GridBagConstraints gbc_btnPickFile = new GridBagConstraints();
 		gbc_btnPickFile.anchor = GridBagConstraints.WEST;
@@ -212,7 +215,7 @@ public class MainWindow {
 		gbc_btnPickFile.gridx = 4;
 		gbc_btnPickFile.gridy = 1;
 		panel.add(btnPickFile, gbc_btnPickFile);
-		
+
 		JButton btnOutputButton = new JButton("Select Output Location");
 		GridBagConstraints gbc_btnOutputButton = new GridBagConstraints();
 		gbc_btnOutputButton.anchor = GridBagConstraints.WEST;
@@ -220,7 +223,18 @@ public class MainWindow {
 		gbc_btnOutputButton.gridx = 4;
 		gbc_btnOutputButton.gridy = 3;
 		panel.add(btnOutputButton, gbc_btnOutputButton);
-		
+
+
+		class InnerClass{
+			public void reset(){
+				btnSortButton.setVisible(false);
+				btnFetchButton.setVisible(true);
+				btnPickFile.setVisible(true);
+				textFieldFullPathToInputFile.setText(" ");
+				textFieldFullPathToInputFile.setVisible(false);
+				sortByListModel.removeAllElements();
+			}
+		}
 		
 		btnFetchButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
@@ -230,6 +244,8 @@ public class MainWindow {
 						btnFetchButton.setVisible(false);
 						btnSortButton.setVisible(true);
 						lblErrorMessage.setVisible(false);
+						
+						
 						
 						ArrayList<String> headersList = fileProcessor.getSheetColumnHeaders();
 						for(int i=0;i<headersList.size();i++){
@@ -244,21 +260,21 @@ public class MainWindow {
 				}
 			}
 		});
+
 		
 		btnSortButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				if (fileProcessor.processFile(sortByList.getSelectedIndex())){
-					
+				String outputPath = textFieldFullPathToInputFile.getText().replace(".", "-Sorted by " + ((String) sortByList.getSelectedItem()).replace(" ","") + ".");
+				if(!textFieldFullPathToOutputFile.getText().equals(" ") && !textFieldFullPathToOutputFile.getText().equals("")) {
+					outputPath = textFieldFullPathToOutputFile.getText();
+				}
+				if (fileProcessor.processFile(sortByList.getSelectedIndex(), outputPath)){
+
 					//save file to disk
 					//fileProcessor.saveToFile()
-					
+
 					//Reset
-					btnSortButton.setVisible(false);
-					btnFetchButton.setVisible(true);
-					btnPickFile.setVisible(true);
-					textFieldFullPathToInputFile.setText(" ");
-					textFieldFullPathToInputFile.setVisible(false);
-					sortByListModel.removeAllElements();
+					new InnerClass().reset();
 					
 					//Notify user you are done
 					lblErrorMessage.setForeground(Color.black);
@@ -267,22 +283,22 @@ public class MainWindow {
 				} else {
 					lblErrorMessage.setText("There was an error processing that file. What was successful has been placed in the folde with the original.");
 				}
-				
+
 			}
 		});
-		
+
 		btnPickFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				//Hide any message already seen
 				lblErrorMessage.setVisible(false);
-				
+
 				//open the file selection dialogue
 				int foundFile = openFileChooser.showOpenDialog(btnPickFile);
 				//if one is selected, show it in the text box
 				if(foundFile == JFileChooser.APPROVE_OPTION ) {
 					File selectedFile = openFileChooser.getSelectedFile();
 					fileProcessor.setFile(selectedFile);
-					
+
 					btnPickFile.setVisible(false);
 					textFieldFullPathToInputFile.setText(selectedFile.getPath());
 					textFieldFullPathToInputFile.setVisible(true);
@@ -290,40 +306,42 @@ public class MainWindow {
 
 			}
 		});
-		
+
 		btnOutputButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				//Hide any message already seen
 				lblErrorMessage.setVisible(false);
-				
-				//open the file selection dialogue
-                int saveFileNamed = saveFileChooser.showSaveDialog(btnOutputButton);
-                String saveFilePath = "";
-                if(saveFileNamed == JFileChooser.APPROVE_OPTION ) {
-                	File saveFile = saveFileChooser.getSelectedFile();
-                	if(!saveFile.getPath().contains(".xls") && !saveFile.getPath().contains(".xlsx")){
-                		String[] inputPath = textFieldFullPathToInputFile.getText().split("\\.");
-                		String extension = inputPath[inputPath.length-1];
-                		
-                		
-                		saveFilePath = saveFileChooser.getSelectedFile().getPath() + "." + extension;
-                	} else {
-                		saveFilePath = saveFile.getPath();
-                	}
 
-                	if(!saveFilePath.contains(".xls") && !saveFilePath.contains(".xlsx")){
-                		lblErrorMessage.setText("Please select an input file first.");
-    					lblErrorMessage.setVisible(true);
-    					return;
-                	}
-                	
-                	btnOutputButton.setVisible(false);
-                	textFieldFullPathToOutputFile.setText(saveFilePath);
-                	textFieldFullPathToOutputFile.setVisible(true);
-                }
+				//open the file selection dialogue
+				int saveFileNamed = saveFileChooser.showSaveDialog(btnOutputButton);
+				String saveFilePath = "";
+				if(saveFileNamed == JFileChooser.APPROVE_OPTION ) {
+					File saveFile = saveFileChooser.getSelectedFile();
+					if(!saveFile.getPath().contains(".xls") && !saveFile.getPath().contains(".xlsx")){
+						String[] inputPath = textFieldFullPathToInputFile.getText().split("\\.");
+						String extension = inputPath[inputPath.length-1];
+
+
+						saveFilePath = saveFileChooser.getSelectedFile().getPath() + "." + extension;
+					} else {
+						saveFilePath = saveFile.getPath();
+					}
+
+					if(!saveFilePath.contains(".xls") && !saveFilePath.contains(".xlsx")){
+						lblErrorMessage.setText("Please select an input file first.");
+						lblErrorMessage.setVisible(true);
+						return;
+					}
+
+					btnOutputButton.setVisible(false);
+					textFieldFullPathToOutputFile.setText(saveFilePath);
+					textFieldFullPathToOutputFile.setVisible(true);
+				}
 
 			}
 		});
+		
+		
 	}
-	
+
 }

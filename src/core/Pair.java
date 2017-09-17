@@ -3,7 +3,7 @@ package core;
 public class Pair {
 	private int valOne;
 	private int valTwo;
-	
+
 	public Pair(int item1, int item2) {
 		valOne = item1;
 		valTwo = item2;
@@ -32,8 +32,8 @@ public class Pair {
 			return false;
 		}
 	}
-	
-	
-	
+
+
+
 }
 
