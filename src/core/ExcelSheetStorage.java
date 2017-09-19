@@ -37,9 +37,9 @@ public class ExcelSheetStorage {
 	public void sort(int colNum){ 
 
 		if(sheetHasSubGroups()){
-			sortWithSubgroups(colNum);
+			prepForSortWithSubgroups(colNum);
 		} else {
-			sortWithoutSubgroups(colNum,4,3);
+			sortWithoutSubgroups(colNum,4,rows.size()-1);
 		}
 
 
@@ -59,7 +59,7 @@ public class ExcelSheetStorage {
 
 	}
 
-	private void sortWithSubgroups(int colNum) {
+	private void prepForSortWithSubgroups(int colNum) {
 
 		ArrayList<Pair> headerPairs = new ArrayList<Pair>();
 		ArrayList<RowSubgroup> subGroups = new ArrayList<RowSubgroup>();
@@ -67,57 +67,225 @@ public class ExcelSheetStorage {
 
 
 		int realColNum = findNthHeader(colNum);
-		findSubgroups(headerPairs, subGroups, realColNum);
+		findSubgroups(headerPairs, subGroups);
 
-
+		
 		if(subGroups.isEmpty()) {
 
-			sortWithoutSubgroups(realColNum, 4,3);
+			sortWithoutSubgroups(realColNum, 4,rows.size()-1);
 		} else {
-			sortWithoutSubgroups(realColNum,4,3); //First sort the subgroups
-			if(realColNum < rows.get(3).getLastCellNum()){
-				sortWithoutSubgroups(realColNum+1,4,3); //then sort the main column
-				shiftSubgroups(subGroups); //move the subgroups to the position of their totalled line
+			//printSheet();
+			moveSubgroupsOutOfTheWay(headerPairs, subGroups);
+			//printSheet();
+			findSubgroupsNewLocation(headerPairs, subGroups);
+			boolean isPartOfHeaderPair = false;
+			for(int i=0;i<headerPairs.size();i++){
+				Pair p = headerPairs.get(i);
+				if(p.contains(realColNum)){
+					isPartOfHeaderPair=true;
+				}
 			}
+			
+
+			if(isPartOfHeaderPair){
+				sortWithSubgroups(realColNum+1,subGroups, 4,3); //sort the main column, shifted by one due to the empty row accompanying it.	
+
+			} else {
+				sortWithSubgroups(realColNum,subGroups, 4,3); //sort the main group, not shifted by an empty row
+			}
+			//printSheet();
+			shiftSubgroups(headerPairs, subGroups); //move the subgroups to the position of their totalled line
+			sortBySubgroups(realColNum, headerPairs, subGroups); //Lastly sort the subgroups
+
+
+			
 		}
 	}
 
+	//method to move all the subgroups to the top of the list, maintaining their grouping
+	private void moveSubgroupsOutOfTheWay(ArrayList<Pair> headerPairs, ArrayList<RowSubgroup> subGroups) {
+		for(int i=0;i<subGroups.size();i++){
+			int bottom = subGroups.get(i).getBottom();
+			int top = subGroups.get(i).getTop();
+			
+			while(!isStaticRow(rows.get(bottom-1))){
+				shiftUpOne(bottom, top);
+				bottom--;
+				top--;
+			}
+			findSubgroupsNewLocation(headerPairs, subGroups);
+		}
+
+	}
+
+	
+	private void sortBySubgroups(int realColNum, ArrayList<Pair> headerPairs, ArrayList<RowSubgroup> subGroups) {
+		// 
+		findSubgroupsNewLocation(headerPairs, subGroups);
+		for(int i=0;i<subGroups.size();i++){
+			findSubgroupsNewLocation(headerPairs, subGroups); //Find the new Locations
+			RowSubgroup gr = subGroups.get(i);
+			quickSortRows(rows, gr.getBottom(), gr.getTop(), realColNum); 		
+		}
+	}
+
+	private void sortWithSubgroups(int realColNum, ArrayList<RowSubgroup> subGroups, int i, int j) {
+		// 
+		int bottom = i;
+		int top = bottom;
+		while(top < rows.size()-1){
+			while(bottom < rows.size()-1 && isWithinSubgroup(bottom, subGroups)){
+				bottom++;
+			}
+			if(top<bottom){
+				top=bottom;
+			}
+			top++;
+			if(isStaticRow(rows.get(top)) || isWithinSubgroup(top, subGroups)){
+				quickSortRows(rows, bottom, top-1, realColNum); 		//actual sorting
+				bottom = top+1;
+				while(bottom < rows.size()-1 && ((isStaticRow(rows.get(bottom)) || isWithinSubgroup(bottom, subGroups)))){
+					bottom++;
+				}
+				if(top<bottom){
+					top=bottom;
+				}
+			}
+		}
+		
+	}
+
+	private boolean rangeIsWithinSubgroup(int bottom, int top, ArrayList<RowSubgroup> subGroups) {
+		for(int i=bottom;i<top;i++) {
+			if(isWithinSubgroup(i, subGroups)){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	
+	private boolean isWithinSubgroup(int index, ArrayList<RowSubgroup> subGroups) {
+
+		for(int j=0;j<subGroups.size();j++){
+			RowSubgroup gr = subGroups.get(j);
+			if(index>=gr.getBottom() && index<=gr.getTop()){
+				return true;
+			}
+		}
+		return false;
+	}
+
+
 	//This shifts the group of rows down until it finds the string of the row that it was attached to before the sort
-	private void shiftSubgroups(ArrayList<RowSubgroup> subGroups) {
+	private void shiftSubgroups(ArrayList<Pair> headerPairs, ArrayList<RowSubgroup> subGroups) {
 		for(int i = 0; i<subGroups.size();i++) {
+			findSubgroupsNewLocation(headerPairs, subGroups);
+			//printSheet();
+			
 			RowSubgroup sg = subGroups.get(i);
 			int subGroupBottom = sg.getBottom();
 			int subGroupTop = sg.getTop();
 			String str = sg.getSorted();
-
-			while(subGroupTop+1 < rows.size() && !rows.get(subGroupTop+1).getCell(0).getStringCellValue().equalsIgnoreCase(str)){
-				shiftDownOne(subGroupBottom, subGroupTop);
-				subGroupBottom++;
-				subGroupTop++;
+			boolean found = false; 
+			if(rowToFindIsBelow(subGroupTop, str)){
+				while(subGroupTop+1 < rows.size()-1 && !found){
+					String nameOfNextCell = rows.get(subGroupTop+1).getCell(0).getStringCellValue();
+					if(!nameOfNextCell.equalsIgnoreCase(str)){
+						shiftDownOne(subGroupBottom, subGroupTop);
+						subGroupBottom++;
+						subGroupTop++;
+					} else {
+						found = true;
+						//printSheet();
+					}
+				}
+			} else if(rowToFindIsAbove(subGroupBottom, str)){
+				while(subGroupBottom-1 > 4 && !found){
+					String nameOfNextCell = rows.get(subGroupTop+1).getCell(0).getStringCellValue();
+					if(!nameOfNextCell.equalsIgnoreCase(str)){
+						shiftUpOne(subGroupBottom, subGroupTop);
+						subGroupBottom--;
+						subGroupTop--;
+					} else {
+						found = true;
+						//printSheet();
+					}
+				}
+			} else {
+				System.out.println("Error, cannot find target cell.");
 			}
+			
+			
 		}
 
+	}
+
+
+
+	private void findSubgroupsNewLocation(ArrayList<Pair> headerPairs, ArrayList<RowSubgroup> subGroups) {
+		for(int i=0;i<subGroups.size();i++){
+			boolean topFound = false;
+			boolean bottomFound = false;
+			String bottomName = subGroups.get(i).getBottomName();
+			String topName = subGroups.get(i).getTopName();
+
+			for(int j=4; j<rows.size()-1 && (!topFound || !bottomFound);j++){
+				if(rows.get(j).getCell(0).getStringCellValue().equalsIgnoreCase(bottomName)){
+					subGroups.get(i).setBottom(j);
+					bottomFound = true;
+				} else if(rows.get(j).getCell(0).getStringCellValue().equalsIgnoreCase(topName)){
+					subGroups.get(i).setTop(j);
+					topFound = true;
+				}
+			}
+		}
+		
+	}
+
+	private boolean rowToFindIsAbove(int subGroupBottom, String str) {
+		for(int i=subGroupBottom;i>4;i--){
+			if(rows.get(i).getCell(0).getStringCellValue().equalsIgnoreCase(str)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean rowToFindIsBelow(int subGroupTop, String str) {
+		for(int i=subGroupTop;i<rows.size()-1;i++){
+			if(rows.get(i).getCell(0).getStringCellValue().equalsIgnoreCase(str)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	//helper to move a group of rows down by one
 	private void shiftDownOne(int start, int end){
-		Row finalRow = rows.get(end);
-		for(int i=end;i>start;i--){
+		Row finalRow = rows.get(end+1);
+		for(int i=end;i>=start;i--){
 			rows.set(i+1, rows.get(i));
 		}
+		
 		rows.set(start, finalRow);
 	}
-
-	private void findSubgroups(ArrayList<Pair> headerPairs, ArrayList<RowSubgroup> subGroups, int colNum) {
-		Pair workingPair = null; //The working pair is the header to sort on and any empty columns that are attached to it
-		for(int i=0;i<headerPairs.size()-1;i++){
-			Pair currentPair = headerPairs.get(i);
-			if (currentPair.contains(colNum)){
-				workingPair = currentPair;
-				break;
+	
+	//helper to move a group of rows up by one
+		private void shiftUpOne(int start, int end){
+			Row finalRow = rows.get(start-1);
+			for(int i=start;i<=end;i++){
+				rows.set(i-1, rows.get(i));
 			}
+			rows.set(end, finalRow);
 		}
-
+		
+		//method to itterate down the first column with subgroups and to add the subgroups to an arraylist
+	private void findSubgroups(ArrayList<Pair> headerPairs, ArrayList<RowSubgroup> subGroups) {
+		Pair workingPair = null; //The working pair is the header to sort on and any empty columns that are attached to it
+		if(headerPairs.get(0)!=null) {
+			workingPair = headerPairs.get(0);
+		}
 		//If there is no working pair, then there should be no subgroups
 		if(workingPair == null){
 			return;
@@ -125,14 +293,30 @@ public class ExcelSheetStorage {
 			int lowerBound=4;
 			int upperBound=3;
 			int ColNumWithSubGroups = workingPair.getValOne();
-			while(upperBound < rows.size()-1){
+			while(upperBound < rows.size()-1 && lowerBound < rows.size()-1){
+				Cell cellFromSubgroupColumn = rows.get(lowerBound).getCell(ColNumWithSubGroups);
+				if(cellFromSubgroupColumn == null || cellFromSubgroupColumn.getCellTypeEnum() == null || cellFromSubgroupColumn.getCellTypeEnum() == CellType.BLANK){
+					while(lowerBound <rows.size()-1){
+						lowerBound++;
+						cellFromSubgroupColumn = rows.get(lowerBound).getCell(ColNumWithSubGroups);
+						if(cellFromSubgroupColumn != null && cellFromSubgroupColumn.getCellTypeEnum() != null && cellFromSubgroupColumn.getCellTypeEnum() != CellType.BLANK){
+							upperBound = lowerBound;
+							break;
+						}
+					}
+					if(lowerBound >=rows.size()-1) {
+						break;
+					}
+				}
 				upperBound++;
-				Cell cellFromSubgroupColumn = rows.get(upperBound).getCell(ColNumWithSubGroups);
+				cellFromSubgroupColumn = rows.get(upperBound).getCell(ColNumWithSubGroups);
 
-				if(cellFromSubgroupColumn != null && cellFromSubgroupColumn.getCellTypeEnum() != null && cellFromSubgroupColumn.getCellTypeEnum() != CellType.BLANK){
-
-				} else {
-					subGroups.add(new RowSubgroup(lowerBound,upperBound,rows.get(upperBound).getCell(0).getStringCellValue()));
+				if(cellFromSubgroupColumn == null || cellFromSubgroupColumn.getCellTypeEnum() == null || cellFromSubgroupColumn.getCellTypeEnum() == CellType.BLANK){
+					cellFromSubgroupColumn = rows.get(lowerBound).getCell(ColNumWithSubGroups);
+					if(cellFromSubgroupColumn != null && cellFromSubgroupColumn.getCellTypeEnum() != null && cellFromSubgroupColumn.getCellTypeEnum() != CellType.BLANK) {
+						subGroups.add(new RowSubgroup(lowerBound,rows.get(lowerBound).getCell(0).getStringCellValue(), upperBound-1,rows.get(upperBound-1).getCell(0).getStringCellValue(), rows.get(upperBound).getCell(0).getStringCellValue()));
+						lowerBound=upperBound;
+					}
 				}
 			}
 		}
@@ -142,7 +326,7 @@ public class ExcelSheetStorage {
 		Row headingsRow = rows.get(3);
 		int headingNum = 0;
 		int LastCellNum = headingsRow.getLastCellNum();
-		for(int i=0;i<headingsRow.getLastCellNum();i++) {
+		for(int i=0;i<LastCellNum;i++) {
 			Cell nextCell = headingsRow.getCell(i);
 			if(nextCell != null && nextCell.getCellTypeEnum() != null && nextCell.getCellTypeEnum() != CellType.BLANK){
 				headingNum++;
@@ -167,8 +351,8 @@ public class ExcelSheetStorage {
 
 	private void sortWithoutSubgroups(int colNum, int lowerBound, int upperBound) {
 		int bottom = lowerBound;
-		int top = upperBound;
-		while(top < rows.size()-1){
+		int top = bottom;
+		while(top < upperBound){
 			top++;
 			if(isStaticRow(rows.get(top))){
 				quickSortRows(rows, bottom, top-1, colNum); 		//actual sorting
@@ -264,9 +448,11 @@ public class ExcelSheetStorage {
 			return (double) 0;
 		} else if (cell1.getCellTypeEnum() == CellType.STRING && cell2.getCellTypeEnum() == CellType.STRING){
 
-			return (double) cell1.getStringCellValue().compareTo(cell2.getStringCellValue());
+			return (double) cell1.getStringCellValue().toLowerCase().compareTo(cell2.getStringCellValue().toLowerCase());
 		} else if (cell1.getCellTypeEnum() == CellType.NUMERIC && cell2.getCellTypeEnum() == CellType.NUMERIC){
 			return cell1.getNumericCellValue() - cell2.getNumericCellValue();
+		} else if (cell1.getCellTypeEnum() == CellType.BLANK && cell2.getCellTypeEnum() == CellType.BLANK){
+			return (double) 0;
 		} else {
 			System.out.println("Something strange happened in the cell comparison");
 			return (double) 0;
@@ -304,8 +490,8 @@ public class ExcelSheetStorage {
 			}
 			System.out.println();
 		}
-
-		
+		System.out.println();
+		System.out.println("-----------------------------------------------------------------------------");
 	}
 
 	public void excelSaveSheet(Workbook workbook, String outputString) {
@@ -354,7 +540,7 @@ public class ExcelSheetStorage {
 			out.close();
 			wb.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// 
 			e.printStackTrace();
 		} finally {
 

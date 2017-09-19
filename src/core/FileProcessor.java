@@ -7,14 +7,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
-import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class FileProcessor {
@@ -131,15 +129,15 @@ public class FileProcessor {
 		excelStorage.sort(colNum);
 
 		//printing/saving excel sheet
-		excelStorage.printSheet();
-		//TODO Add saving of data to new Excel File
+		//excelStorage.printSheet();
+		
 		
 		try {
 			excelStorage.excelSaveSheet(workbook, outputString);
 
 			workbook.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		
